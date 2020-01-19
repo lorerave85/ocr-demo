@@ -1,0 +1,3 @@
+[submodule "src/ocr/preprocess_ocr"]
+	path = src/ocr/preprocess_ocr
+	url = https://github.com/jasonlfunk/ocr-text-extraction
