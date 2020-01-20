@@ -1,6 +1,5 @@
 # Optical Character Recognition Demo
 
--------------------------------------------------------------------------------
 Despite not being precisely a recent introduction to Computer Vision,
 it would seem like the subfield of Optical Character Recognition is 
 not mature yet, as each step of its development is full of nuances and
@@ -302,7 +301,7 @@ or not we have arrived to the first working version of our demo.
 
 ![](./screenshots/preprocessing_steps_tin1.png)
 
-## Asses
+## Assess
 
 Given the nice preprocessing results that we have already obtained, we want
 now to get back to the `Tesseract`. We had mentioned also the it support 
