@@ -41,7 +41,7 @@ for tweaks/customizations that may help. Experiment after the changes,
 summarize results and analyze them for more insight.
 4. Hit the Library: Look up articles on the suspected problem. Ideally, choose
 publications for which there is source code available.
-5. Asses: Take a new approach or combine the newly found approach 
+5. Assess: Take a new approach or combine the newly found approach 
 with the one initially tested. Assess whether the results improved.
 6. Benchmark: Define a quality metric, try out other OCR implementations and 
 compare them to the current baseline.
