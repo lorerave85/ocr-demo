@@ -119,10 +119,10 @@ the file is empty; no text was recognized:
 
 ## Experiment
 
-At this point we have no are entirely sure the recognition files. However, 
+At this point we are not entirely sure why the recognition fails. However, 
 [Tesseract's Wiki page](https://github.com/tesseract-ocr/tesseract/wiki/ImproveQuality)
-present a several suggestions. As we know, the first stage of OCR algorithms 
-often performs input image banalization. Is the binaries version of the 
+presents several suggestions. As we know, the first stage of OCR algorithms 
+often performs input image binarization. If the binarizd of the 
 input image is not good enough, chances are the following stage will not produce
 any character matches. The documentation suggests to pass the
 ` -c tessedit_write_images=1` argument to the `CLI` to save the binarized image
@@ -135,10 +135,10 @@ processed:
 
 ![](./screenshots/tesseract_input_debug.png)
 
-A first indication of a potential issue is the fact there is marked difference in
-contrast between text and background across the two images. Font is also 
+A first indication of a potential issue is the fact there is a marked contrast
+difference between text and background across the two images. Font is also 
 different in size and in proportion with the image margins. So now it might be 
-reasonable to argue that what we are missing is different approach for
+reasonable to argue that what we are missing is a different approach for
 binarizing the input and perhaps applying some re-scaling. Before we rush
 to conclusions however, let us continue experimenting.
 
@@ -163,20 +163,20 @@ resides on the preprocessing stage rather than in the classification stage:
 
 The 
 [Tesseract's User Forum](https://groups.google.com/forum/#!msg/tesseract-ocr/Wdh_JJwnw94/24JHDYQbBQAJ)
-Presents interesting analysis on font size. For two versions of the library 
-version and two test datasets, the recognition error reaches a minimum when 
-capital letters have between 20 and 50 pixels. This specific font is of course 
+presents an interesting analysis on font size. For two versions of the library 
+and two test datasets, the recognition error reaches a minimum when 
+capital letters have between 20 and 50 pixels. This specific size is of course 
 library-dependent but it gives another reason to believe we ought to re-scale
 our input images before staring the processing.
 
 ![](./screenshots/tess_accuracy_4fonts.png)
 
-Although automatically rescaling the input is big issue on its own (as we would
+Although automatically rescaling the input is a big issue on its own (as we would
 need to know upfront what the initial font size is in order to script the 
-re-scaling method), for this demo it will suffice to do the re-scaling manually.
+re-scaling method), for this demo it will suffice to do so manually.
 
 One last hint the [documentation](https://github.com/tesseract-ocr/tesseract/wiki/ImproveQuality#page-segmentation-method) 
-provides is the `Page Segmentation Mode` adjustment. By default, `Tesseract` expects a page of text when it segments an image. If we just seeking to OCR a small region, we could try a different segmentation mode using the `--psm` argument:
+provides is the `Page Segmentation Mode` adjustment. By default, `Tesseract` expects a page of text when it segments an image. If we are justseeking to OCR a small region, we could try a different segmentation mode using the `--psm` argument:
 
 ```
   0    Orientation and script detection (OSD) only.
@@ -213,7 +213,7 @@ The [batch_process.sh](https://github.com/slothkong/ocr-demo/blob/223565ce303a57
 
 After a quick inspection of the output text files we can conclude that:
 1. There is a clear difference on outcome for different page segmentation modes,
-with some files containing no files and others holding 10+ text lines.
+with some files containing no text and others holding 10+ text lines.
 2. The font size also place a roll, as recognitions for the down scaled image
 tend to have less gibberish in them. A good example is the result comparison for 
 segmentation mode 6.
@@ -262,20 +262,20 @@ i i
 ```
 
 Indeed, after gathering all this evidence, we could argue that besides 
-unideal font sizes, our main remaining issue relates to image binarization and 
-revolves around the question of: how to deal
+unideal font sizes, one of the main remaining issue relates to image
+binarization and revolves around the question of: how to deal
 with the font and background color similarity?
 
 ## Hit the Library
 
 With the insight that we already got through experimentation, we now focus on 
-looking for a preprocessing algorithm, one that perhaps allow for [font and 
+looking for a preprocessing algorithm, one that perhaps allows for [font and 
 background color independent text binarization](https://github.com/slothkong/ocr-demo/blob/master/literature/Font%20and%20Backgorund%20Color%20Independent%20Text%20Binarization.pdf) :wink:
 
 ![](./screenshots/paper_frontpage.png)
 
-Seems like we are in luck. Not only is the paper title fitting, there is also
-an open source [Python2 implementation](https://github.com/slothkong/ocr-text-extraction) of it.
+Seems like we are in luck. Not only is the paper's title fitting, there is also
+an open source [Python2 implementation](https://github.com/slothkong/ocr-text-extraction) for it.
 Although the repo is a bit outdated, it comes with a [extract_text](https://github.com/slothkong/ocr-text-extraction/blob/master/extract_text) 
 script that generates a `.png` binarized version of a given input. If we turn
 on the [DEBUG](https://github.com/slothkong/ocr-text-extraction/blob/b26c31d0ca1cca9d6cc9fd532e59c1f1abaad5df/extract_text#L32) 
@@ -285,15 +285,15 @@ we executed the script on  [tin_001_downscaled.jpeg](https://github.com/slothkon
 
 ![](./screenshots/preprocess_ocr_downscaled.png)
 
-Note that we trimmed out the middle of the terminal as the debug 
+Note that we trimmed out the middle of the terminal outpot as the debug 
 logs are too extensive to fit in a single screenshot. Additionally, note that we 
 have added a time measurement statement to the [extract_text](https://github.com/slothkong/ocr-text-extraction/blob/b26c31d0ca1cca9d6cc9fd532e59c1f1abaad5df/extract_text#L334)
 script to evaluate its performance. For this particular image the execution time
-is ~916 ms, which is perfectly acceptable for academic but the same might not
+is ~916 ms, which is perfectly acceptable for academic, but the same might not
 be true for servicing applications at scale.
 
 Nevertheless, we show here the four resulting images, including the binarized 
-one, which is looking amazingly good! Some of the details in the "B" letter got 
+one which is looking amazingly good! Some of the details in the "B" letter got 
 lost and there is some noise at the start of the number "2" which might cause 
 problems latter one. But in overall the fonts are now in black while the 
 background is completely white; this exactly what we needed to assess whether
@@ -304,11 +304,11 @@ or not we have arrived to the first working version of our demo.
 ## Assess
 
 Given the nice preprocessing results that we have already obtained, we want
-now to get back to the `Tesseract`. We had mentioned also the it support 
+now to get back to the `Tesseract`. We had mentioned also that it supports 
 character classification through LSTM execution. As "Deep Learning" brings
 and additional level of accuracy to most "Computer Vision" applications, let us
 build a small application that interacts with a `Tesseract` object running and
-LSTM and for the ideal page segmentation mode for our use case, which seems to 
+LSTM and uses the ideal page segmentation mode for our use case, which seems to 
 be "single column" (mode 4). 
 
 The code is located in [lstm_ocr.cpp](https://github.com/slothkong/ocr-demo/blob/master/src/ocr/lstm_ocr/lstm_ocr.cpp). 
@@ -324,20 +324,20 @@ Having our first version of `lstm_ocr.cpp` ready, we compile it, throw [tin_001_
 
 ![](./screenshots/lstm_ocr_downscaled.png)
 
-Our application displays the recognized text to the terminal and we are pleased 
+Our application displays the recognized text on the terminal and we are pleased 
 to see that longest line of text is also the most similar to the tire code. 
 Although not all the characters where detected, 11 out 15 are correct (if we 
-ignore the black spaces):
+ignore the blank spaces):
 
     Original  Label: "DOT AFXK WBBM 2419"
     Predicted Label: "- DOr.  ~ AFXK WEbY 12419"
 
-It is not entirely certain why none alphanumeric characters show up but it might,
-be to noise in the binarized input image. The same might be said about the 
-additional "1" at the beginning of "12419". That could be the next problem we
+It is not entirely certain why none alphanumeric characters show up, but it 
+might be due to noise in the binarized input image. The same might be said about
+the additional "1" at the beginning of "12419". That could be the next problem we
 could look into.
 
-However, if we are feeling bold we might simply assume that tire codes 
+Nonetheless, if we are feeling bold we might simply assume that tire codes 
 are only made up out of alphanumeric characters and that more often
 than not the longest recognized text line corresponds to the actual tire code.
 After writing a [filterChars()](https://github.com/slothkong/ocr-demo/blob/223565ce303a57a6349b0d292dad46d7428bcb20/src/ocr/lstm_ocr/lstm_ocr.cpp#L26) and a [getLongestLine()](https://github.com/slothkong/ocr-demo/blob/223565ce303a57a6349b0d292dad46d7428bcb20/src/ocr/lstm_ocr/lstm_ocr.cpp#L38) functions to implement the above 
@@ -382,10 +382,10 @@ listed in the "Browse" section. If we were to define or adopt a robust metric
 for evaluating OCR accuracy and gather a big enough dataset of images, we could
 potentially benchmark several libraries and algorithms. Then select the one
 that gives the best results and repeat the steps here described to address its
-limitations.
+limitations. We leave this for future work.
 
 All in all, [Tesseract](https://github.com/tesseract-ocr/tesseract) in combination with [Color Independent Binarization](https://github.com/slothkong/ocr-text-extraction) 
-brought us in to time to a possible solution. I hope you find this demo
+brought us in no time to a possible solution. I hope you find this demo
 helpful.
 
 
